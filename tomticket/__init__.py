@@ -8,7 +8,8 @@ from .errors import (ArgumentError, AuthenticationError, # noqa
 from .lib.setter_property import SetterProperty
 from .request import Request
 
-# from .contact import Contact
+from .criar_cliente import Criar_Cliente
+from .cria_chamado import Criar_Chamado
 
 import copy
 import random
@@ -30,8 +31,7 @@ CONFIGURATION_REQUIRED_TEXT = "You must set both Tomticket.api_key to use this c
 
 class TomticketType(type):  # noqa
 
-    app_id = None
-    app_api_key = None
+    api_key = None
     _hostname = "api.tomticket.com"
     _protocol = "https"
     _endpoints = None
@@ -42,7 +42,7 @@ class TomticketType(type):  # noqa
 
     @property
     def _auth(self):
-        return (self.app_id, self.app_api_key)
+        return self.api_key
 
     @property
     def _random_endpoint(self):
@@ -62,7 +62,7 @@ class TomticketType(type):  # noqa
 
     @property
     def target_base_url(self):
-        if None in [self.app_id, self.app_api_key]:
+        if None in [self.api_key]:
             raise ArgumentError('%s %s' % (
                 CONFIGURATION_REQUIRED_TEXT, RELATED_DOCS_TEXT))
         if self._target_base_url is None:

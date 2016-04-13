@@ -5,14 +5,6 @@ from tomticket import utils
 
 class Save(object):
 
-    @classmethod
-    def create(cls, **params):
-        from tomticket import Tomticket
-        collection = utils.resource_class_to_collection_name(cls)
-        response = Tomticket.post("/%s/" % (collection), **params)
-        if response:  # may be empty if we received a 202
-            return cls(**response)
-
     def from_dict(self, pdict):
         for key, value in list(pdict.items()):
             setattr(self, key, value)
@@ -38,25 +30,13 @@ class Save(object):
 
     def save(self):
         from tomticket import Tomticket
-        collection = utils.resource_class_to_collection_name(self.__class__)
+        collection = utils.resource_class_to_name(self.__class__)
         params = self.attributes
-        if self.id_present and not self.posted_updates:
-            # update
-            response = Tomticket.put('/%s/%s' % (collection, self.id), **params)
-        else:
-            # create
-            params.update(self.identity_hash)
-            response = Tomticket.post('/%s' % (collection), **params)
+
+        response = Tomticket.post('/{0}/%(token)s'.format(collection), **params)
+
         if response:
             return self.from_response(response)
-
-    @property
-    def id_present(self):
-        return getattr(self, 'id', None) and self.id != ""
-
-    @property
-    def posted_updates(self):
-        return getattr(self, 'update_verb', None) == 'post'
 
     @property
     def identity_hash(self):
